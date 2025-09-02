@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const ResumeSchema = new mongoose.Schema({
   title: { type: String, default: 'My Resume' },
   roleId: { type: mongoose.Schema.Types.ObjectId, ref: 'Role', default: null },
-  companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company', default: null },
+  companyName: { type: String, default: '' },
   data: { type: Object, default: {} },
   pdfUrl: { type: String, default: '' },
   atsScore: { type: Number, default: 0 },

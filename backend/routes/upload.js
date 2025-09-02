@@ -3,6 +3,7 @@ const router = express.Router();
 const upload = require('../middleware/upload');
 const ctrl = require('../controllers/uploadController');
 
-router.post('/', upload.single('file'), ctrl.upload);
+// Accept any file field name (e.g., 'file', 'resume', 'document')
+router.post('/', upload.any(), ctrl.upload);
 
 module.exports = router;

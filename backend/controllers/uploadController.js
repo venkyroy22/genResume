@@ -5,9 +5,16 @@ const Role = require('../models/Role');
 
 exports.upload = async (req, res) => {
   try {
-    if (!req.file) return res.status(400).json({ error: 'No file uploaded (field name must be "file")' });
-    const filePath = req.file.path;
-    const text = await extractText(filePath);
+    // Support both single-file (req.file) and any-field uploads (req.files)
+    const file = req.file || (Array.isArray(req.files) && req.files[0]);
+    if (!file) return res.status(400).json({ error: 'No file uploaded. Send multipart/form-data with a file field.' });
+
+    const filePath = file.path; // Cloudinary URL
+    let text = '';
+    // const ext = file.originalname.split('.').pop().toLowerCase();
+    // if (['docx', 'txt'].includes(ext)) {
+    //   text = await extractText(filePath);
+    // } // For images, no text extraction
 
     let roleKeywords = [];
     if (req.body.roleId) {
@@ -15,15 +22,15 @@ exports.upload = async (req, res) => {
       if (role) roleKeywords = role.keywords;
     }
 
-    const atsScore = scoreResume(text, roleKeywords);
-    const suggestions = generateSuggestions(text, roleKeywords);
+    const atsScore = text ? scoreResume(text, roleKeywords) : 0;
+    const suggestions = text ? generateSuggestions(text, roleKeywords) : [];
 
     const resume = new Resume({
-      title: req.body.title || req.file.originalname,
+      title: req.body.title || file.originalname,
       roleId: req.body.roleId || null,
-      companyId: req.body.companyId || null,
+      companyName: req.body.companyName || '',
       data: { text },
-      pdfUrl: `/uploads/${req.file.filename}`,
+      pdfUrl: filePath, // Cloudinary URL
       atsScore,
       suggestions
     });
